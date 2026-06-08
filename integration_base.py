@@ -51,3 +51,10 @@ def rectangle_python(a, b, n, p):
         milieu = a + (i + 0.5) * h
         somme += polynome(milieu, p)
     return somme * h
+
+
+def rectangle_numpy(a, b, n, p):
+    """Methode du rectangle (point milieu), vectorisee avec NumPy."""
+    h = (b - a) / n
+    milieux = a + (np.arange(n) + 0.5) * h   # tous les centres d'un coup
+    return h * np.sum(polynome(milieux, p))

@@ -41,3 +41,13 @@ def erreur_pour_n(methode, a, b, n, p):
     """
     exacte = integrale_analytique(a, b, p)
     return erreur(methode(a, b, n, p), exacte)
+
+
+def rectangle_python(a, b, n, p):
+    """Methode du rectangle (point milieu) en Python de base."""
+    h = (b - a) / n
+    somme = 0.0
+    for i in range(n):                 # boucle indexee, comme en C
+        milieu = a + (i + 0.5) * h
+        somme += polynome(milieu, p)
+    return somme * h

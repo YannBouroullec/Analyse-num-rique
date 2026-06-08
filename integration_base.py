@@ -26,3 +26,18 @@ def integrale_analytique(a, b, p):
         return p1 * t + p2 * t ** 2 / 2 + p3 * t ** 3 / 3 + p4 * t ** 4 / 4
 
     return primitive(b) - primitive(a)
+
+
+def erreur(valeur_numerique, valeur_exacte):
+    """Erreur absolue entre une valeur numerique et la valeur exacte."""
+    return abs(valeur_numerique - valeur_exacte)
+
+
+def erreur_pour_n(methode, a, b, n, p):
+    """Erreur d'integration d'une methode pour un nombre de segments n.
+
+    'methode' est une fonction methode(a, b, n, p) : on peut donc passer
+    n'importe quelle methode en argument.
+    """
+    exacte = integrale_analytique(a, b, p)
+    return erreur(methode(a, b, n, p), exacte)

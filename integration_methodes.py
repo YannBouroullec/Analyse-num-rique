@@ -1,0 +1,28 @@
+"""
+integration_methodes.py
+========================
+Trapeze, Simpson et versions pre-programmees.
+Ce module reutilise la fonction polynome definie dans integration_base.
+"""
+
+import numpy as np
+from scipy.integrate import simpson as _scipy_simpson
+
+from integration_base import polynome
+
+
+def trapeze_python(a, b, n, p):
+    """Methode des trapezes en Python de base."""
+    h = (b - a) / n
+    somme = (polynome(a, p) + polynome(b, p)) / 2.0   # bornes : poids 1/2
+    for i in range(1, n):                              # noeuds interieurs : poids 1
+        somme += polynome(a + i * h, p)
+    return somme * h
+
+
+def trapeze_numpy(a, b, n, p):
+    """Methode des trapezes, vectorisee avec NumPy."""
+    h = (b - a) / n
+    x = np.linspace(a, b, n + 1)        # n+1 noeuds -> n segments
+    y = polynome(x, p)
+    return h * (np.sum(y) - (y[0] + y[-1]) / 2.0)

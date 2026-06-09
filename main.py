@@ -57,9 +57,41 @@ def afficher_demonstration():
         print(f"{nom:32s}{valeur:16.8f}{err:16.2e}")
     print("=" * 64)
 
+def etude_convergence():
+    """Dict {nom_methode: liste d'erreurs} pour chaque n de LISTE_N."""
+    erreurs = {nom: [] for nom in METHODES}
+    for n in LISTE_N:
+        for nom, methode in METHODES.items():
+            erreurs[nom].append(base.erreur_pour_n(methode, A, B, n, P))
+    return erreurs
+
+
+def etude_temps():
+    """Dict {nom_methode: liste de temps moyens} pour chaque n."""
+    temps = {nom: [] for nom in METHODES}
+    for n in LISTE_N:
+        if n <= 1024:
+            repetitions = 50
+        elif n <= 100000:
+            repetitions = 5
+        else:
+            repetitions = 3
+        for nom, methode in METHODES.items():
+            temps[nom].append(mesure_temps(methode, n, repetitions))
+    return temps
 
 def main():
     afficher_demonstration()
+    print("\nEtude de convergence en cours...")
+    erreurs = etude_convergence()
+    print("Mesure des temps d'execution (timeit) en cours...")
+    temps = etude_temps()
+    print("\nGain de vitesse NumPy vs Python (au plus grand n) :")
+    for nom_base in ["Rectangle", "Trapeze", "Simpson"]:
+        t_py = temps[f"{nom_base} (Python)"][-1]
+        t_np = temps[f"{nom_base} (NumPy)"][-1]
+        print(f"  {nom_base:10s}: x{t_py / t_np:6.1f}   "
+              f"(Python {t_py:.2e} s  vs  NumPy {t_np:.2e} s)")
 
 
 if __name__ == "__main__":

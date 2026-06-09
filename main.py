@@ -80,7 +80,85 @@ def etude_temps():
             temps[nom].append(mesure_temps(methode, n, repetitions))
     return temps
 
+COULEURS = {"Rectangle": "#1f77b4", "Trapeze": "#ff7f0e", "Simpson": "#2ca02c"}
+
+
+def _famille(nom):
+    """Couleur selon la famille (rectangle / trapeze / simpson)."""
+    for cle, couleur in COULEURS.items():
+        if cle in nom:
+            return couleur
+    return "#7f7f7f"
+
+
+def figure_convergence(erreurs):
+    plt.figure(figsize=(7, 5))
+    a_tracer = ["Rectangle (NumPy)", "Trapeze (NumPy)", "Simpson (NumPy)",
+                "Trapeze (numpy.trapezoid)", "Simpson (scipy.simpson)"]
+    styles = {"Trapeze (numpy.trapezoid)": "--", "Simpson (scipy.simpson)": "--"}
+    for nom in a_tracer:
+        # Plancher a ~epsilon machine pour garder Simpson (exact) visible en log.
+        err = np.maximum(np.array(erreurs[nom], dtype=float), 1e-16)
+        plt.loglog(LISTE_N, err, marker="o", markersize=3,
+                   linestyle=styles.get(nom, "-"), color=_famille(nom), label=nom)
+    ref = np.array(LISTE_N, dtype=float)
+    plt.loglog(ref, erreurs["Rectangle (NumPy)"][0] * (ref[0] / ref) ** 2,
+               "k:", linewidth=1, label=r"pente $\propto 1/n^2$")
+    plt.ylim(1e-16, 5)
+    plt.xlabel("Nombre de segments n")
+    plt.ylabel("Erreur absolue")
+    plt.title("Convergence des methodes d'integration")
+    plt.grid(True, which="both", alpha=0.3)
+    plt.legend(fontsize=8)
+    plt.tight_layout()
+    plt.savefig("fig1_convergence.png", dpi=150)
+    plt.close()
+
+
+def figure_temps(temps):
+    plt.figure(figsize=(7, 5))
+    for nom in temps:
+        if "Python" in nom:
+            style = "-"
+        elif "NumPy" in nom:
+            style = "--"
+        else:
+            style = ":"
+        plt.loglog(LISTE_N, temps[nom], marker="o", markersize=3,
+                   linestyle=style, color=_famille(nom), label=nom)
+    plt.xlabel("Nombre de segments n")
+    plt.ylabel("Temps d'execution moyen (s)")
+    plt.title("Temps de calcul : Python de base vs NumPy")
+    plt.grid(True, which="both", alpha=0.3)
+    plt.legend(fontsize=8)
+    plt.tight_layout()
+    plt.savefig("fig2_temps.png", dpi=150)
+    plt.close()
+
+
+def figure_erreur_par_methode(erreurs):
+    familles = ["Rectangle (NumPy)", "Trapeze (NumPy)", "Simpson (NumPy)"]
+    n_choisis = [10, 100, 1000]
+    valeurs = {fam: [base.erreur_pour_n(METHODES[fam], A, B, n, P)
+                     for n in n_choisis] for fam in familles}
+    x = np.arange(len(familles))
+    largeur = 0.25
+    plt.figure(figsize=(7, 5))
+    for j, n in enumerate(n_choisis):
+        hauteurs = [valeurs[fam][j] for fam in familles]
+        plt.bar(x + (j - 1) * largeur, hauteurs, largeur, label=f"n = {n}")
+    plt.yscale("log")
+    plt.xticks(x, [f.replace(" (NumPy)", "") for f in familles])
+    plt.ylabel("Erreur absolue (echelle log)")
+    plt.title("Erreur selon la methode et le nombre de segments")
+    plt.legend()
+    plt.grid(True, axis="y", which="both", alpha=0.3)
+    plt.tight_layout()
+    plt.savefig("fig3_erreur_methodes.png", dpi=150)
+    plt.close()
+
 def main():
+    
     afficher_demonstration()
     print("\nEtude de convergence en cours...")
     erreurs = etude_convergence()
@@ -92,6 +170,12 @@ def main():
         t_np = temps[f"{nom_base} (NumPy)"][-1]
         print(f"  {nom_base:10s}: x{t_py / t_np:6.1f}   "
               f"(Python {t_py:.2e} s  vs  NumPy {t_np:.2e} s)")
+        
+    print("\nGeneration des figures...")
+    figure_convergence(erreurs)
+    figure_temps(temps)
+    figure_erreur_par_methode(erreurs)
+    print("Figures enregistrees : fig1, fig2, fig3 (.png)")
 
 
 if __name__ == "__main__":

@@ -26,3 +26,29 @@ def trapeze_numpy(a, b, n, p):
     x = np.linspace(a, b, n + 1)        # n+1 noeuds -> n segments
     y = polynome(x, p)
     return h * (np.sum(y) - (y[0] + y[-1]) / 2.0)
+
+
+def simpson_python(a, b, n, p):
+    """Methode de Simpson en Python de base.
+
+    Sur chaque segment [g, d] : (h/6)*(f(g) + 4*f(milieu) + f(d)).
+    Exacte pour un polynome de degre <= 3.
+    """
+    h = (b - a) / n
+    somme = 0.0
+    for i in range(n):
+        gauche = a + i * h
+        droite = gauche + h
+        milieu = (gauche + droite) / 2.0
+        somme += polynome(gauche, p) + 4 * polynome(milieu, p) + polynome(droite, p)
+    return somme * h / 6.0
+
+
+def simpson_numpy(a, b, n, p):
+    """Methode de Simpson, vectorisee avec NumPy."""
+    h = (b - a) / n
+    gauche = a + np.arange(n) * h       # bornes gauches de tous les segments
+    droite = gauche + h                 # bornes droites
+    milieu = gauche + h / 2.0           # milieux
+    contributions = polynome(gauche, p) + 4 * polynome(milieu, p) + polynome(droite, p)
+    return h / 6.0 * np.sum(contributions)

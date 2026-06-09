@@ -52,3 +52,17 @@ def simpson_numpy(a, b, n, p):
     milieu = gauche + h / 2.0           # milieux
     contributions = polynome(gauche, p) + 4 * polynome(milieu, p) + polynome(droite, p)
     return h / 6.0 * np.sum(contributions)
+
+
+def trapeze_preprog(a, b, n, p):
+    """Trapeze pre-programme : numpy.trapezoid (ex-numpy.trapz)."""
+    x = np.linspace(a, b, n + 1)
+    y = polynome(x, p)
+    return np.trapezoid(y, x)
+
+
+def simpson_preprog(a, b, n, p):
+    """Simpson pre-programme : scipy.integrate.simpson."""
+    x = np.linspace(a, b, n + 1)
+    y = polynome(x, p)
+    return _scipy_simpson(y, x=x)
